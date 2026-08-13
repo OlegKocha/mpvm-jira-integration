@@ -1,0 +1,78 @@
+mpvm:
+  base_url: "https://mpvm.example.org"
+  # Поддерживается только авторизация персональным reference-токеном.
+  access_token_env: "MPVM_ACCESS_TOKEN"
+  verify_ssl: true                   # true, false (не рекомендуется) или путь к CA-файлу
+  timeout_seconds: 60
+  retries: 3
+  page_size: 1000
+  max_pages: 10000
+  initial_result_delay_seconds: 5
+  utc_offset: "+03:00"
+
+  # Запросы проверены на MP VM 2.10. Если модель вашей инсталляции отличается,
+  # сначала соберите эквивалентный запрос в интерфейсе MP VM и замените строки.
+  assets_pdql: >-
+    Select(@Host as AssetId, Host.FQDN as Fqdn, Host.@IPLIST as IpAddresses,
+    Host.@Importance as AssetImportance, Host.OsName as OsName,
+    Host.OsVersion as OsVersion)
+  vulnerabilities_pdql: >-
+    Filter(Host.@Vulners.Status in ['new', 'inProgress', 'awaitingFix', 'overdue', 'stale']) |
+    Select(@Host as AssetId, Host.@Vulners.Id as VulnerabilityId,
+    Host.@Vulners.Ids as Identifiers, Host.@Vulners.Cves as Cves,
+    Host.@Vulners.Score as CvssScore,
+    Host.@Vulners.Cvss3Vector as Cvss3Vector,
+    Host.@Vulners.Cvss2Vector as Cvss2Vector,
+    Host.@Vulners.SeverityRating as Severity,
+    Host.@Vulners.Description as Description,
+    Host.@Vulners.HowToFix as HowToFix, Host.@Vulners.Status as Status)
+  # Отдельный запрос сохраняет точную связь «уязвимость — установленное ПО».
+  # Не добавляйте Host.Softs в vulnerabilities_pdql: это перемножит строки.
+  software_vulnerabilities_pdql: >-
+    Filter(Host.Softs.@Vulners.Status in ['new', 'inProgress', 'awaitingFix', 'overdue', 'stale']) |
+    Select(@Host as AssetId,
+    Host.Softs.@Vulners.Id as VulnerabilityId,
+    Host.Softs.Name as PackageName,
+    Host.Softs.Version as PackageVersion,
+    Host.Softs.@Vulners.Status as Status)
+  active_statuses: ["new", "inProgress", "awaitingFix", "overdue", "stale"]
+
+jira:
+  deployment: "cloud"               # cloud | data_center
+  base_url: "https://company.atlassian.net"
+  api_version: "3"                  # Cloud: 3; Data Center: 2
+  auth_mode: "basic"                # Cloud: basic; Data Center PAT: bearer
+  user_env: "JIRA_USER"
+  token_env: "JIRA_API_TOKEN"
+  project_key: "SEC"                # Замените SEC на ключ проекта, в котором скрипт должен создавать задачи.
+  issue_type: "Task"                # В русской Jira может называться «Задача»
+  verify_ssl: true
+  timeout_seconds: 60
+  retries: 3
+  labels: ["maxpatrol-vm"]
+  default_priority: "Medium"
+  strict_priorities: true
+  strict_attachment_permissions: true
+  duplicate_policy: "skip_seen_snapshot"  # skip_seen_snapshot | create
+  state_file: ".mpvm-jira-state.json"
+  attachment_subdir: "attachments"
+  max_issues_per_run: 0               # 0 — без ограничения; для первого теста укажите 1
+
+  # Слева — значение значимости актива MP VM, справа — точное имя приоритета Jira.
+  priority_map:
+    High: "High"
+    H: "High"
+    Medium: "Medium"
+    M: "Medium"
+    Low: "Low"
+    L: "Low"
+    ND: "Medium"
+    Undefined: "Medium"
+    Высокая: "High"
+    Средняя: "Medium"
+    Низкая: "Low"
+    Не определена: "Medium"
+
+  # Дополнительные поля экрана создания Jira, если они обязательны в вашем проекте.
+  # Пример: customfield_12345: {value: "Security"}
+  additional_fields: {}

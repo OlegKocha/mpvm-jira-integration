@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "maxpatrol-vm-jira-integration"
+version = "1.0.0"
+description = "Export current MaxPatrol VM vulnerabilities and create Jira tasks"
+requires-python = ">=3.10"
+dependencies = [
+  "openpyxl>=3.1,<4",
+  "requests>=2.31,<3",
+  "PyYAML>=6.0,<7",
+]
+
+[project.scripts]
+mpvm-jira = "mpvm_jira.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["mpvm_jira*"]
