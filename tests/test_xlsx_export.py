@@ -4,8 +4,8 @@ from pathlib import Path
 
 from openpyxl import load_workbook
 
-from mpvm_jira.models import Asset, SoftwarePackage, Vulnerability
 from mpvm_jira.jira.xlsx_export import XLSX_HEADERS, export_asset_xlsx
+from mpvm_jira.models import Asset, SoftwarePackage, Vulnerability
 
 
 class XlsxExportTests(unittest.TestCase):

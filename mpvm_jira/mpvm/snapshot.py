@@ -10,7 +10,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-
 _FILE_RE = re.compile(r"^vulnerabilities_(\d{2})\.(\d{2})\.(\d{2})\.json$")
 
 

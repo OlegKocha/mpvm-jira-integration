@@ -37,21 +37,11 @@ class JiraFormatTests(unittest.TestCase):
             fqdn="srv.example.org",
             ip_addresses=("192.0.2.10",),
             vulnerabilities=[
-                Vulnerability(
-                    cvss_score=9.8, severity="Critical", cvss_vector=vector
-                ),
-                Vulnerability(
-                    cvss_score=8.5, severity="High", cvss_vector=vector
-                ),
-                Vulnerability(
-                    cvss_score=5.5, severity="Medium", cvss_vector=vector
-                ),
-                Vulnerability(
-                    cvss_score=2.1, severity="Low", cvss_vector=vector
-                ),
-                Vulnerability(
-                    cvss_score=9.1, severity="Critical", cvss_vector=""
-                ),
+                Vulnerability(cvss_score=9.8, severity="Critical", cvss_vector=vector),
+                Vulnerability(cvss_score=8.5, severity="High", cvss_vector=vector),
+                Vulnerability(cvss_score=5.5, severity="Medium", cvss_vector=vector),
+                Vulnerability(cvss_score=2.1, severity="Low", cvss_vector=vector),
+                Vulnerability(cvss_score=9.1, severity="Critical", cvss_vector=""),
             ],
         )
 
@@ -64,11 +54,7 @@ class JiraFormatTests(unittest.TestCase):
         self.assertEqual(rows["Низкого уровня"], 1)
         self.assertEqual(rows["Без критичности (без вектора CVSS)"], 1)
         self.assertEqual(
-            sum(
-                value
-                for key, value in rows.items()
-                if key != "Всего уязвимостей"
-            ),
+            sum(value for key, value in rows.items() if key != "Всего уязвимостей"),
             5,
         )
 
@@ -156,23 +142,19 @@ class JiraFormatTests(unittest.TestCase):
         self.assertNotIn("||Категория||Количество||", description)
         self.assertIn("|*Всего уязвимостей*|*5*|", description)
         self.assertIn(
-            "|{color:#FF2400}Критического уровня{color}|"
-            "{color:#FF2400}1{color}|",
+            "|{color:#FF2400}Критического уровня{color}|{color:#FF2400}1{color}|",
             description,
         )
         self.assertIn(
-            "|{color:#D32F2F}Высокого уровня{color}|"
-            "{color:#D32F2F}1{color}|",
+            "|{color:#D32F2F}Высокого уровня{color}|{color:#D32F2F}1{color}|",
             description,
         )
         self.assertIn(
-            "|{color:#B86E00}Среднего уровня{color}|"
-            "{color:#B86E00}1{color}|",
+            "|{color:#B86E00}Среднего уровня{color}|{color:#B86E00}1{color}|",
             description,
         )
         self.assertIn(
-            "|{color:#0052CC}Низкого уровня{color}|"
-            "{color:#0052CC}1{color}|",
+            "|{color:#0052CC}Низкого уровня{color}|{color:#0052CC}1{color}|",
             description,
         )
         self.assertIn("|Без критичности (без вектора CVSS)|1|", description)
@@ -200,6 +182,16 @@ class JiraFormatTests(unittest.TestCase):
             content_type,
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
+
+    def test_description_format_depends_on_api_version_only(self):
+        client = JiraClient.__new__(JiraClient)
+        client.api_version = "2"
+        client.deployment = "cloud"
+        self.assertIsInstance(client._description(self.asset), str)
+
+        client.api_version = "3"
+        client.deployment = "data_center"
+        self.assertIsInstance(client._description(self.asset), dict)
 
 
 if __name__ == "__main__":

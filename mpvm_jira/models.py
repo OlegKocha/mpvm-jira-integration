@@ -6,7 +6,6 @@ import ipaddress
 from dataclasses import dataclass, field
 from typing import Any
 
-
 _SEVERITY_RU = {
     "critical": "Критический",
     "критический": "Критический",
@@ -73,7 +72,7 @@ class SoftwarePackage:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "SoftwarePackage":
+    def from_dict(cls, data: dict[str, Any]) -> SoftwarePackage:
         """Build an installed package from a snapshot mapping."""
         return cls(
             name=str(data.get("name") or ""),
@@ -139,7 +138,7 @@ class Vulnerability:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Vulnerability":
+    def from_dict(cls, data: dict[str, Any]) -> Vulnerability:
         """Build a vulnerability from a snapshot mapping."""
         return cls(
             vulnerability_id=str(data.get("vulnerability_id") or ""),
@@ -218,7 +217,7 @@ class Asset:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Asset":
+    def from_dict(cls, data: dict[str, Any]) -> Asset:
         """Build an asset from a snapshot mapping."""
         return cls(
             asset_id=str(data.get("asset_id") or ""),

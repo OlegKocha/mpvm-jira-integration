@@ -14,7 +14,6 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from ..models import Asset, localized_severity
 
-
 XLSX_HEADERS = (
     "№",
     "CVE",

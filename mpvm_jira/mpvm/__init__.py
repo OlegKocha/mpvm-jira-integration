@@ -12,7 +12,6 @@ from .client import (
 from .service import export_snapshot
 from .snapshot import latest_snapshot, read_snapshot, save_snapshot
 
-
 __all__ = [
     "MaxPatrolClient",
     "apply_pdql_filter",

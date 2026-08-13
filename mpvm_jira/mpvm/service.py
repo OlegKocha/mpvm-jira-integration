@@ -9,7 +9,6 @@ from pathlib import Path
 from .client import MaxPatrolClient
 from .snapshot import save_snapshot
 
-
 LOG = logging.getLogger(__name__)
 
 

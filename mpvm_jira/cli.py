@@ -7,9 +7,9 @@ import json
 import logging
 import re
 import sys
+from collections.abc import Sequence
 from datetime import datetime
 from pathlib import Path
-from typing import Sequence
 
 from .config import ConfigError, load_config
 from .jira import IntegrationRunError, JiraClient, sync_latest_to_jira
@@ -25,7 +25,7 @@ from .mpvm import (
     normalize_fqdn_filter,
     normalize_ip_selector,
 )
-
+from .setup import run_setup
 
 LOG = logging.getLogger(__name__)
 _SENSITIVE_LOG_PATTERNS = (
@@ -103,6 +103,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="Создать каталог logs и записать подробный журнал выполнения",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
+    subparsers.add_parser(
+        "setup", help="Запустить интерактивный мастер настройки"
+    )
     subparsers.add_parser(
         "validate", help="Проверить подключения и конфигурацию"
     )
@@ -250,6 +253,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         args.verbose,
     )
     try:
+        if args.command == "setup":
+            return run_setup(base_dir)
         if args.command == "latest":
             path = latest_snapshot(base_dir)
             LOG.info("Последний JSON-снимок: %s", path)

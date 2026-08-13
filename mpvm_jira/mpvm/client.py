@@ -8,14 +8,13 @@ import json
 import logging
 import re
 import time
-from collections.abc import Sequence
+from collections.abc import Iterable, Iterator, Sequence
 from datetime import datetime
-from typing import Any, Iterable, Iterator
+from typing import Any
 
 from ..config import env_secret, require
 from ..http import ApiError, build_session, checked_json
 from ..models import Asset, SoftwarePackage, Vulnerability
-
 
 LOG = logging.getLogger(__name__)
 _CVE_RE = re.compile(r"\bCVE-\d{4}-\d{4,7}\b", re.IGNORECASE)

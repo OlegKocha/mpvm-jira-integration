@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 from typing import Any
@@ -30,7 +31,12 @@ def load_dotenv(path: Path) -> None:
         key, value = line.split("=", 1)
         key = key.strip()
         value = value.strip()
-        if value[:1] == value[-1:] and value[:1] in {"'", '"'}:
+        if value[:1] == value[-1:] == '"':
+            try:
+                value = json.loads(value)
+            except json.JSONDecodeError:
+                value = value[1:-1]
+        elif value[:1] == value[-1:] == "'":
             value = value[1:-1]
         if key and key not in os.environ:
             os.environ[key] = value
@@ -51,16 +57,12 @@ def load_config(path: Path, env_file: Path | None = None) -> dict[str, Any]:
     return data
 
 
-def env_secret(
-    config: dict[str, Any], field: str, *, required: bool = True
-) -> str:
+def env_secret(config: dict[str, Any], field: str, *, required: bool = True) -> str:
     """Read a secret from the environment variable named in config."""
     variable = str(config.get(field, "")).strip()
     value = os.environ.get(variable, "") if variable else ""
     if required and not value:
-        raise ConfigError(
-            f"Не задана переменная окружения {variable or field}"
-        )
+        raise ConfigError(f"Не задана переменная окружения {variable or field}")
     return value
 
 

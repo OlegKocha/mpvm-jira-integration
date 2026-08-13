@@ -18,7 +18,6 @@ from .criticality import (
     vulnerability_criticality,
 )
 
-
 LOG = logging.getLogger(__name__)
 _SUMMARY_ROW_STYLES = {
     "Всего уязвимостей": {"bold": True},
@@ -272,7 +271,7 @@ class JiraClient:
         criticalities: Sequence[str] | None = None,
     ) -> Any:
         """Select the description format supported by the Jira API."""
-        if self.deployment == "cloud" or self.api_version == "3":
+        if self.api_version == "3":
             return build_adf_description(asset, criticalities)
         return build_wiki_description(asset, criticalities)
 

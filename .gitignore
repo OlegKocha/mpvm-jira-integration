@@ -26,6 +26,7 @@ vulnerabilities_*.xlsx
 .DS_Store
 .idea/
 .vscode/
+.worktrees/
 
 # Локальная копия для интеграционных тестов содержит свои .env, config и логи.
 test-single-issue/

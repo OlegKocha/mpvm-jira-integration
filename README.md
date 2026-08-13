@@ -5,6 +5,8 @@
 ## Оглавление
 
 - [0. Быстрый старт](#0-быстрый-старт)
+  - [Вариант 1. Графическая консольная настройка](#вариант-1-графическая-консольная-настройка)
+  - [Вариант 2. Ручная настройка](#вариант-2-ручная-настройка)
 - [1. Что понадобится](#1-что-понадобится)
   - [Перед первым запуском](#перед-первым-запуском)
 - [2. Получение токена MaxPatrol VM](#2-получение-токена-maxpatrol-vm)
@@ -22,7 +24,6 @@
 - [11. Журналы и диагностика](#11-журналы-и-диагностика)
 - [12. Известные ограничения](#12-известные-ограничения)
 - [13. Справочные материалы](#13-справочные-материалы)
-- [14. Лицензия](#14-лицензия)
 
 Поддерживаются:
 
@@ -30,6 +31,7 @@
 - Jira REST API;
 - оформленное XLSX-вложение с уязвимостями для каждого актива;
 - фильтрация XLSX и таблицы Jira по выбранным уровням критичности;
+- интерактивный консольный мастер `setup`;
 - отдельные команды `validate`, `export`, `sync`, `run`, `latest`;
 - dry-run, журналы и защита от повторной обработки одного JSON.
 
@@ -37,10 +39,52 @@
 
 > ❗ **Обязательно:** конфиденциальная информация должна храниться только в локальном файле `.env`. По умолчанию этот файл отсутствует. Не добавляйте `.env` в Git.
 
-1. Клонируйте репозиторий, создайте виртуальное окружение и локальные файлы настроек:
+Сначала клонируйте репозиторий, создайте виртуальное окружение и установите зависимости:
+
+```bash
+git clone https://github.com/OlegKocha/maxpatrol-vm-jira-integration.git && cd maxpatrol-vm-jira-integration && python3 -m venv .venv && source .venv/bin/activate && python -m pip install -r requirements.txt
+```
+
+### Вариант 1. Графическая консольная настройка
+
+Перед запуском убедитесь, что с компьютера доступны и MaxPatrol VM, и Jira. Мастер проверяет введенные подключения, справочники и права в реальном времени. Если один из стендов недоступен, используйте [ручную настройку](#вариант-2-ручная-настройка).
+
+Запустите полноэкранный мастер:
+
+```bash
+python -m mpvm_jira setup
+```
+
+Мастер последовательно предложит:
+
+1. Выбрать перезапись существующих `.env` и `config.yaml` либо создать их резервные копии с датой и временем.
+2. Ввести адрес и reference-токен MaxPatrol VM, выбрать способ проверки TLS, затем проверить подключение.
+3. Ввести адрес Jira, выбрать способ входа и способ проверки TLS, затем определить доступную версию REST API.
+4. Выбрать найденные проект, тип задачи и соответствия приоритетов; при необходимости значения можно указать вручную.
+5. Заполнить обязательные поля экрана создания Jira и при необходимости вручную выбрать версию REST API в дополнительных настройках.
+6. Выполнить итоговую проверку и сохранить `.env` и `config.yaml`.
+
+Токены на всех экранах маскируются и записываются только в `.env`. Мастер сохраняет файлы только после успешной итоговой проверки и сам не выгружает данные, не создает задачи и не прикрепляет XLSX. PDQL при графической настройке берется из встроенного штатного шаблона; нестандартные запросы изменяются вручную в созданном `config.yaml`.
+
+После завершения можно проверить конфигурацию и выполнить пробный цикл без записи в Jira:
+
+```bash
+python -m mpvm_jira validate
+python -m mpvm_jira run --dry-run
+```
+
+Для рабочего запуска используйте:
+
+```bash
+python -m mpvm_jira run
+```
+
+### Вариант 2. Ручная настройка
+
+1. Создайте локальные файлы настроек и ограничьте доступ к ним:
 
    ```bash
-   git clone https://github.com/OlegKocha/mpvm-jira-integration.git && cd mpvm-jira-integration && python3 -m venv .venv && source .venv/bin/activate && python -m pip install -r requirements.txt && cp .env.example .env && cp config.example.yaml config.yaml && chmod 600 .env config.yaml
+   cp .env.example .env && cp config.example.yaml config.yaml && chmod 600 .env config.yaml
    ```
 
 2. Выпустите reference-токен MP VM и запишите его в `.env` как `MPVM_ACCESS_TOKEN`. Подробнее — в разделе [«Получение токена MaxPatrol VM»](#2-получение-токена-maxpatrol-vm).
@@ -86,7 +130,7 @@
    ```bash
    cp .env.example .env
    cp config.example.yaml config.yaml
-   chmod 600 .env
+   chmod 600 .env config.yaml
    ```
 
 10. **Замените заглушки только в локальных файлах.** Заполните `.env` реальными токенами, а `config.yaml` — адресами ваших систем и параметрами проекта. Файлы `.env` и `config.yaml` исключены из Git и не должны отправляться в репозиторий, мессенджер, issue или pull request.
@@ -163,20 +207,20 @@ GET /rest/api/2/attachment/meta
 Linux/macOS:
 
 ```bash
-cd /path/to/mpvm-jira-integration
+cd /path/to/maxpatrol-vm-jira-integration
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 cp config.example.yaml config.yaml
 cp .env.example .env
-chmod 600 .env
+chmod 600 .env config.yaml
 ```
 
 Windows PowerShell:
 
 ```powershell
-cd C:\path\to\mpvm-jira-integration
+cd C:\path\to\maxpatrol-vm-jira-integration
 py -3 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
@@ -202,6 +246,12 @@ mpvm_jira/
 │   ├── criticality.py  # фильтрация уязвимостей по критичности
 │   ├── service.py      # чтение JSON и создание задач с вложениями
 │   └── xlsx_export.py  # формирование XLSX для отдельного актива
+├── setup/
+│   ├── app.py          # полноэкранное консольное приложение
+│   ├── screens.py      # экраны мастера и зависимые поля
+│   ├── discovery.py    # проекты, типы задач, приоритеты и поля Jira
+│   ├── validation.py   # итоговая проверка MP VM и Jira
+│   └── writer.py       # безопасная запись .env и config.yaml
 ├── cli.py              # команды и аргументы командной строки
 ├── config.py           # загрузка и проверка конфигурации
 ├── http.py             # общая настройка HTTP-сессий и повторных запросов
@@ -311,12 +361,13 @@ python -m mpvm_jira --config config.yaml --env-file .env validate
 
 ### Доступные команды и флаги
 
-`validate`, `export`, `sync`, `run` и `latest` — это команды. Параметры, начинающиеся с `--`, являются флагами.
+`setup`, `validate`, `export`, `sync`, `run` и `latest` — это команды. Параметры, начинающиеся с `--`, являются флагами.
 
 Команды:
 
 | Команда | Назначение |
 |---|---|
+| `setup` | Запустить полноэкранный мастер первоначальной настройки `.env` и `config.yaml`. |
 | `validate` | Проверить конфигурацию, токены и подключения к MP VM и Jira без создания задач. |
 | `export` | Получить данные из MP VM и сохранить новый JSON-снимок. |
 | `sync` | Прочитать последний JSON-снимок и создать задачи Jira с XLSX-вложениями. |
@@ -555,7 +606,7 @@ python -m mpvm_jira --debug --config config.yaml --env-file .env run --fqdn srv0
 python -m mpvm_jira --debug --verbose --config config.yaml --env-file .env validate
 ```
 
-Тело ответа API при ошибке не записывается в сообщение исключения. Не помещайте токены в параметры URL или поля данных. Журнал может содержать внутренние URL, пути, FQDN и IP-адреса, поэтому не публикуйте его и не добавляйте в Git.
+Ответ API при ошибке ограничивается первыми 2000 символами. Не помещайте токены в параметры URL или поля данных. Журнал может содержать внутренние URL, пути, FQDN и IP-адреса, поэтому не публикуйте его и не добавляйте в Git.
 
 ## 12. Известные ограничения
 
@@ -573,7 +624,3 @@ python -m mpvm_jira --debug --verbose --config config.yaml --env-file .env valid
 - [Справка Positive Technologies: токен доступа](https://help.ptsecurity.com/ru-RU/projects/vm/2.1/help/7927776011)
 - [Справка Positive Technologies: PDQL-токен](https://help.ptsecurity.com/ru-RU/projects/vm/2.1/help/7296182411)
 - [Неофициальный PTVM SDK](https://gitlab.com/bsploit/ptvm_sdk/)
-
-## 14. Лицензия
-
-Проект распространяется по лицензии [MIT](LICENSE). Разрешается свободно использовать, копировать, изменять и распространять код при сохранении текста лицензии. Программное обеспечение предоставляется без гарантий; автор не несет ответственности за его использование.

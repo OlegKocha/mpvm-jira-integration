@@ -6,7 +6,6 @@ from collections.abc import Iterable, Sequence
 
 from ..models import Vulnerability, localized_severity
 
-
 CRITICALITY_LEVELS = (
     "Critical",
     "High",

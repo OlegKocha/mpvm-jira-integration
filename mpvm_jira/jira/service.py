@@ -12,16 +12,15 @@ from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
+from ..models import Asset
+from ..mpvm.snapshot import latest_snapshot, read_snapshot
+from .client import JiraClient
 from .criticality import (
     CRITICALITY_LEVELS,
     filter_vulnerabilities,
     normalize_criticalities,
 )
-from ..models import Asset
-from ..mpvm.snapshot import latest_snapshot, read_snapshot
-from .client import JiraClient
 from .xlsx_export import export_asset_xlsx
-
 
 LOG = logging.getLogger(__name__)
 

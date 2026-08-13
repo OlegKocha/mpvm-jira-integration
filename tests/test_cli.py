@@ -1,11 +1,15 @@
 import unittest
+from pathlib import Path
+from unittest.mock import patch
 
-from mpvm_jira.cli import build_parser
+from mpvm_jira.cli import build_parser, main
+from mpvm_jira.setup import run_setup
 
 
 class CliHelpTests(unittest.TestCase):
     def test_general_help_lists_subcommand_flags(self):
         help_text = build_parser().format_help()
+        self.assertIn("setup", help_text)
         self.assertIn("export --fqdn FQDN [FQDN ...]", help_text)
         self.assertIn(
             "export --ip IP_OR_RANGE [IP_OR_RANGE ...]",
@@ -102,6 +106,19 @@ class CliHelpTests(unittest.TestCase):
     def test_unknown_criticality_is_rejected(self):
         with self.assertRaises(SystemExit):
             build_parser().parse_args(["run", "--criticality", "urgent"])
+
+    @patch("mpvm_jira.cli.run_setup", return_value=0)
+    def test_setup_runs_without_loading_existing_config(self, run_setup):
+        base_dir = Path("/tmp/mpvm-jira-setup-test")
+
+        result = main(["--base-dir", str(base_dir), "setup"])
+
+        self.assertEqual(result, 0)
+        run_setup.assert_called_once_with(base_dir.resolve())
+
+    @patch("mpvm_jira.setup.sys.stdin.isatty", return_value=False)
+    def test_setup_requires_an_interactive_terminal(self, _isatty):
+        self.assertEqual(run_setup(Path(".")), 2)
 
 
 if __name__ == "__main__":

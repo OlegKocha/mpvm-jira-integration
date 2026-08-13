@@ -11,6 +11,7 @@ dependencies = [
   "openpyxl>=3.1,<4",
   "requests>=2.31,<3",
   "PyYAML>=6.0,<7",
+  "textual>=8.2,<9",
 ]
 
 [project.scripts]
@@ -18,3 +19,6 @@ mpvm-jira = "mpvm_jira.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["mpvm_jira*"]
+
+[tool.setuptools.package-data]
+"mpvm_jira.templates" = ["*.yaml"]

@@ -8,7 +8,6 @@ from .client import (
 )
 from .service import IntegrationRunError, sync_latest_to_jira
 
-
 __all__ = [
     "IntegrationRunError",
     "JiraClient",
